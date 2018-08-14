@@ -1,0 +1,45 @@
+package cn.ac.iscas.spider.threads;
+
+import org.apache.log4j.Logger;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import cn.ac.iscas.spider.fetcher.PageFetcher;
+import cn.ac.iscas.spider.parser.ListParser;
+import cn.ac.iscas.spider.queue.DetailUrlQueue;
+import cn.ac.iscas.spider.queue.ListUrlQueue;
+import cn.ac.iscas.spider.queue.VisitedUrlQueue;
+
+/**
+ * @author dragonwu
+ * @version 创建时间：2015年6月25日 上午10:27:42
+ * 类说明:
+ * 用于抓取列表页；
+ * 该线程的输出对应于DetailWoker的输入，即生产者消费者模型;
+ */
+public class ListWorker implements Runnable{
+	
+	private static final Logger logger = Logger.getLogger(ListWorker.class.getName());
+	
+	private int threadIndex;
+	
+	public ListWorker(int threadIndex){
+		this.threadIndex = threadIndex;
+	}
+	
+	@Override
+	public void run() {
+		while(true){
+			logger.info("ListWorker"+threadIndex+">>:working...");
+			PageFetcher pf = new PageFetcher();//初始化爬虫，具体参看项目中PageFetcher类
+			String url = ListUrlQueue.outElement();
+			VisitedUrlQueue.addElement(url);
+			String pageContent = pf.getContentFromUrl(url);//获得爬取页面的内容
+			ListParser lp = new ListParser(); 
+			lp.parse(pageContent);//解析页面内容
+			logger.info("ListWorker"+threadIndex+">>:成功抓取"+url);
+		}
+	}
+}

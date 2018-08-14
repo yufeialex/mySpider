@@ -1,0 +1,76 @@
+package cn.ac.iscas.spider.fetcher;
+
+import java.util.logging.Logger;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
+
+import cn.ac.iscas.spider.queue.DetailUrlQueue;
+
+
+/**
+ * @author dragonwu
+ * @version 创建时间：2015年6月24日 下午5:38:40
+ * 类说明  
+ * 使用 httpclient 获取网页内容
+ * 如果网页内容获取失败的话，将网页重新加入队列；
+ */
+public class PageFetcher {
+	
+	private static final Logger logger = Logger.getLogger(PageFetcher.class.getName());
+	
+	private HttpClient client;	
+	
+	/**
+	 * 创建HttpClient实例，并初始化连接参数
+	 */
+	public PageFetcher(){
+		HttpParams params = new BasicHttpParams();
+	    HttpConnectionParams.setConnectionTimeout(params, 10 * 1000);
+	    HttpConnectionParams.setSoTimeout(params, 10 * 1000);	    
+		client = new DefaultHttpClient(params);
+	}
+	
+	/**
+	 * 主动关闭HttpClient连接
+	 */
+	public void close(){
+		client.getConnectionManager().shutdown();
+	}
+	/**
+	 * 根据URL获取字符流
+	 * @param url
+	 * @return
+	 */
+	public String getContentFromUrl(String url){
+		String content = null;
+		int statusCode = 500;		
+		// 创建Get请求，并设置Header
+		HttpGet getHttp = new HttpGet(url);
+		getHttp.setHeader("User-Agent",
+				"Mozilla/5.0 (Windows NT 6.1; rv:16.0) Gecko/20100101 Firefox/16.0");
+		HttpResponse response;	
+		try {
+			response = client.execute(getHttp);
+			statusCode = response.getStatusLine().getStatusCode();
+			HttpEntity entity = response.getEntity();	
+			//此处对HTTP状态码的处理可以更丰富些，将常见的错误全部处理，比如404错误等；
+			if(statusCode == 200){
+				content = EntityUtils.toString(entity, "utf-8");
+			}
+		} catch (Exception e) {
+			logger.info(">> Put back url: " + url);
+			DetailUrlQueue.addElement(url);
+			e.printStackTrace();
+		}
+		return content;
+	}
+	
+}

@@ -1,0 +1,34 @@
+package cn.ac.iscas.spider.parser;
+
+import java.util.logging.Logger;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+/**
+ * @author dragonwu
+ * @version 创建时间：2015年6月25日 下午12:34:15 类说明
+ */
+public class DetailParser {
+	private static final Logger logger = Logger.getLogger(DetailParser.class
+			.getName());
+
+	public void parse(String pageContent) {
+		// 提取页面中的url，放入队列，供第二步获取详细页
+		logger.info("解析页面。。");
+		if (pageContent != null) {
+			Document doc = Jsoup.parse(pageContent);
+			Element content = doc.select("div.content").first();
+			if (content == null)
+				return;
+			Elements ctts = content.select("p");
+			for (Element ctt : ctts) {
+				String text = ctt.text();// 取出文本内容
+				if (text != null)
+					logger.info(text);
+			}
+		}
+	}
+}

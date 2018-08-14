@@ -1,0 +1,43 @@
+package cn.ac.iscas.spider.threads;
+
+import java.util.logging.Logger;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import cn.ac.iscas.spider.fetcher.PageFetcher;
+import cn.ac.iscas.spider.parser.DetailParser;
+import cn.ac.iscas.spider.queue.DetailUrlQueue;
+
+
+/**
+ * @author dragonwu
+ * @version 创建时间：2015年6月25日 上午9:45:53
+ * 类说明
+ * 用于抓取详细页面
+ */
+public class DetailWorker implements Runnable{
+	
+	private static final Logger logger = Logger.getLogger(DetailWorker.class.getName());
+	//线程ID，用于标识此线程
+	private int threadIndex;
+	
+	public DetailWorker(int threadIndex){
+		this.threadIndex = threadIndex;
+	}
+	
+	@Override
+	public void run() {
+		while(true){
+			logger.info("DetailWorker"+threadIndex+">>:woking.....");
+			PageFetcher pf = new PageFetcher();//初始化爬虫，具体参看项目中PageFetcher类
+			String url = DetailUrlQueue.outElement();
+			String pageContent = pf.getContentFromUrl(url);//获得爬取页面的内容
+			DetailParser dp = new DetailParser();
+			dp.parse(pageContent);//解析页面内容
+			logger.info("DetailWorker"+threadIndex+">>:成功抓取"+url);
+		}
+	}
+}

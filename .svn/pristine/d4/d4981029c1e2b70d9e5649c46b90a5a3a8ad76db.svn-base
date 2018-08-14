@@ -1,0 +1,104 @@
+package cn.ac.iscas.spider.utils;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+
+public class RegexParse {
+	public static String baseParse(String content ,String regex,int group) {
+		if(content==null)
+			 throw new  NullPointerException();
+		if(regex==null)
+			 throw new  NullPointerException();
+		Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(content);
+		if(m.find()) 
+			return	m.group(group);
+		return null;
+	}
+	
+	public static String baseParse(String content ,String regex) {
+		if(content==null||regex==null)
+			 throw new  NullPointerException();
+		Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(content);
+		if(m.find()) 
+			return	m.group();
+		return null;
+	}
+	
+	public static boolean ismatching(String content ,String regex) {
+		if(content==null||regex==null)
+			 throw new  NullPointerException();
+		Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(content);
+		if(m.find()) 
+			return	true;
+		return false;
+	}
+	
+	public static List<String> baseParseList(String content ,String regex,int group,int i) {
+		if(content==null||regex==null)
+			 throw new  NullPointerException();
+		Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(content);
+		List<String> strList=new LinkedList<String>();
+		int sum=0;
+			while(m.find()) 
+				strList.add(m.group(group)+"["+i+","+((++sum))+"]");
+		return strList;
+	}
+	public static List<String> baseParseList(String content ,String regex,int group) {
+		if(content==null||regex==null)
+			 throw new  NullPointerException();
+		Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(content);
+		List<String> strList=new LinkedList<String>();
+		while(m.find()) 
+			strList.add(m.group(group));
+		return strList;
+	}
+
+	public static List<String> baseParseList(String content ,String regex) {
+		if(content==null||regex==null)
+			 throw new  NullPointerException();
+		Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(content);
+		List<String> strList=new LinkedList<String>();
+		while(m.find()) 
+		 strList.add(m.group());
+		return strList;
+	}
+	
+	
+	/***
+	 *  用于带组号  多返回匹配
+	 *  i代表层号，sum代表id号。也就是第几个的意思。用于标识此值是属于那层的第几个
+	 * @param content
+	 * @param regex
+	 * @param group
+	 * @return
+	 */
+	public static List<String> getParseList(String content ,String regex,int group,int sequence) {
+		if(content==null||regex==null)
+			throw new NullPointerException();
+		Pattern p = Pattern.compile(regex,Pattern.CASE_INSENSITIVE);
+		Matcher m = p.matcher(content);
+		List<String> strList=new LinkedList<String>();
+			int sum=0;
+			while(m.find()) 
+			{
+				String str=m.group(group);
+				//str=HttpUtil.filterTag(str);
+				//new XiHuLog("[Group:]"+group+"[Regex:]\t"+regex+"[Value:]\t"+str);
+				strList.add(str);
+				sum++;
+				if(sum==sequence)
+					break;
+			}
+		return strList;
+	}
+	
+}

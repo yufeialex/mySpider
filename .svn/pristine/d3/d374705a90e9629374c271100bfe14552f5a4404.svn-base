@@ -1,0 +1,12 @@
+##############DB CONFIG#######################
+database.driverClassName=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://124.16.136.235:3306/FinicalLabDB?characterEncoding=utf8
+jdbc.username=root
+jdbc.password=123456
+###############SPIDER CONFIG######################
+spider.threadNum=10
+spider.fetchDelay=1000
+###############PROXY CONFIG######################
+PROXY=D:/gldworkspace/datamanager/PROXY/
+###############PROXY CONFIG######################
+FirstUrl=http://www.ccgp-guizhou.gov.cn/html/11?para1=0

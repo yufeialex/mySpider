@@ -1,0 +1,97 @@
+package cn.ac.iscas.spider.queue;
+
+import java.util.LinkedList;
+import java.util.logging.Logger;
+
+/**
+ * @author dragonwu
+ * @version 创建时间：2015年6月25日 上午9:20:52
+ * 类说明
+ * 这个队列用于存储已经访问过的URL；随着抓取的网页越来越多，这个队列会越来越大；
+ * 因此可以考虑将此URL改为关系型数据库表的形式存放已访问URL；
+ */
+public class ListUrlQueue {
+	private static final Logger logger = Logger.getLogger(ListUrlQueue.class
+			.getName());
+	// MAX_SIZE定义了队列的最大长度；
+	final static int MAX_SIZE = 10000;
+	// 使用LinkedList数据结构来存储url
+	private static LinkedList<String> listQueue = new LinkedList<String>();
+
+	/**
+	 * 向队列中添加待访问URL
+	 * 
+	 * @param url
+	 */
+	public static void addElement(String url) {
+		// 对资源加锁，确保同一时间只有同一个生产者向队列中存放URL
+		synchronized (listQueue) {
+			// 如果队列已满，阻塞队列。
+			while (listQueue.size() >= MAX_SIZE) {
+				logger.info(">>:队列已满！！！");
+				try {
+					// 阻塞
+					listQueue.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			// 如果队列没满，向队列中添加url
+			listQueue.add(url);
+			logger.info(">>:【现在队列存放量为】:" + listQueue.size());
+			listQueue.notifyAll();
+		}
+	}
+
+	/**
+	 * 从队列中移除一个URL
+	 * 
+	 * @return
+	 */
+	public static String outElement() {
+		String url;
+		synchronized (listQueue) {
+			//如果队列为空，阻塞进程。
+			while (listQueue.size() < 1) {
+				System.out.println(">>:队列为空,无法取出URL！！！");
+				try {
+					// 阻塞
+					listQueue.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			//如果队列没空，取出URL
+			url = listQueue.removeFirst();
+			logger.info(">>:【现在队列存放量为】:" + listQueue.size());
+			listQueue.notifyAll();
+			return url;
+		}
+	}
+	
+	/**
+	 * 判断队列是否为空
+	 * @return
+	 */
+	public static boolean isEmpty(){
+		return listQueue.isEmpty();
+	}
+	
+	/**
+	 * 返回队列长度
+	 * @return
+	 */
+	public static int size(){
+		return listQueue.size();
+	}
+	
+	/**
+	 * 判断队列是否已经包含该url
+	 * @param url
+	 * @return
+	 */
+	public static boolean isContains(String url){
+		return listQueue.contains(url);
+	}
+
+}

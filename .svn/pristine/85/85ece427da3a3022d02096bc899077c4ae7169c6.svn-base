@@ -1,0 +1,97 @@
+package cn.ac.iscas.spider.queue;
+
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.logging.Logger;
+
+/**
+ * @author dragonwu
+ * @version 创建时间：2015年6月25日 上午9:20:40 类说明 URLQueue提供了URL在内存中的存储，主要记录了待访问的URL队列；
+ *          如果需要做分布式的爬虫，可以将这个内存队列改为Redis存储的方式，完成简单的分布式网络爬虫；
+ */
+public class DetailUrlQueue {
+
+	private static final Logger logger = Logger.getLogger(DetailUrlQueue.class
+			.getName());
+	// MAX_SIZE定义了队列的最大长度；
+	final static int MAX_SIZE = 10000;
+	// 使用LinkedList数据结构来存储url
+	private static LinkedList<String> urlQueue = new LinkedList<String>();
+
+	/**
+	 * 向队列中添加待访问URL
+	 * 
+	 * @param url
+	 */
+	public static void addElement(String url) {
+		// 对资源加锁，确保同一时间只有同一个生产者向队列中存放URL
+		synchronized (urlQueue) {
+			// 如果队列已满，阻塞队列。
+			while (urlQueue.size() >= MAX_SIZE) {
+				logger.info(">>:队列已满！！！");
+				try {
+					// 阻塞
+					urlQueue.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			// 如果队列没满，向队列中添加url
+			urlQueue.add(url);
+			logger.info(">>:【现在队列存放量为】:" + urlQueue.size());
+			urlQueue.notifyAll();
+		}
+	}
+
+	/**
+	 * 从队列中移除一个URL
+	 * 
+	 * @return
+	 */
+	public static String outElement() {
+		String url;
+		synchronized (urlQueue) {
+			//如果队列为空，阻塞进程。
+			while (urlQueue.size() < 1) {
+				System.out.println(">>:队列为空,无法取出URL！！！");
+				try {
+					// 阻塞
+					urlQueue.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			//如果队列没空，取出URL
+			url = urlQueue.removeFirst();
+			logger.info(">>:【现在队列存放量为】:" + urlQueue.size());
+			urlQueue.notifyAll();
+			return url;
+		}
+	}
+	
+	/**
+	 * 判断队列是否为空
+	 * @return
+	 */
+	public static boolean isEmpty(){
+		return urlQueue.isEmpty();
+	}
+	
+	/**
+	 * 返回队列长度
+	 * @return
+	 */
+	public static int size(){
+		return urlQueue.size();
+	}
+	
+	/**
+	 * 判断队列是否已经包含该url
+	 * @param url
+	 * @return
+	 */
+	public static boolean isContains(String url){
+		return urlQueue.contains(url);
+	}
+
+}

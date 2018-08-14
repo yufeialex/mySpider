@@ -1,0 +1,33 @@
+package cn.ac.iscas.spider.threads;
+
+import org.apache.log4j.Logger;
+
+/**
+ * @author dragonwu
+ * @version 创建时间：2015年6月25日 上午9:50:43
+ * 类说明
+ * 该线程为守护线程，负责统计当前活动的线程数；
+ */
+public class DeamonThread implements Runnable{
+	
+	private static final Logger logger = Logger.getLogger(DeamonThread.class.getName());
+	//负责守护的线程组；
+	private ThreadGroup threadGroup;
+	
+	public DeamonThread(ThreadGroup threadGroup){
+		this.threadGroup = threadGroup;
+	}
+	
+	@Override
+	public void run() {
+		while(true){
+			logger.info(">>:" + threadGroup.getName()+" has "+threadGroup.activeCount()+" alived!");
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+}

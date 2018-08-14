@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间,作用就是对sql进行分类化管理,理解sql隔离
+注意:使用mapper代理方法开发,namespace有特殊重要的作用,namespace等于mapper接口地址-->
+<mapper namespace="com.yufei.dao.SecondHandDao">
+
+    <!--通过ignore关键字将主键冲突时的报错改为返回0-->
+    <!--int insertSecondHand(SecondHand secondHand);-->
+    <insert id="insertSecondHand">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+        INSERT ignore INTO second_hand (
+        link,
+        total_price,
+        unit_price,
+        down_payments,
+        building_name,
+        building_year,
+        district,
+        business_district,
+        district_describe,
+        house_layout,
+        tFloor,
+        house_area,
+        house_type,
+        inside_area,
+        building_type,
+        orientation,
+        building_construct,
+        decoration,
+        staircase,
+        heating,
+        elevator,
+        property_right_year,
+        listing_date ,
+        trading_type,
+        last_trade_time,
+        house_usage ,
+        holding_year,
+        property_right_own,
+        mortgage,
+        usage_rate,
+        dp_rate,
+        comment,
+        cost_house,
+        cost_agency,
+        cost_tax,
+        is_unique,
+        evaluation_price,
+        evaluation_rate,
+        dpe_rate
+        ) VALUES (
+        #{link},
+        #{total_price},
+        #{unit_price},
+        #{down_payments},
+        #{building_name},
+        #{building_year},
+        #{district},
+        #{business_district},
+        #{district_describe},
+        #{house_layout},
+        #{tFloor},
+        #{house_area},
+        #{house_type},
+        #{inside_area},
+        #{building_type},
+        #{orientation},
+        #{building_construct},
+        #{decoration},
+        #{staircase},
+        #{heating},
+        #{elevator},
+        #{property_right_year},
+        #{listing_date},
+        #{trading_type},
+        #{last_trade_time},
+        #{house_usage},
+        #{holding_year},
+        #{property_right_own},
+        #{mortgage},
+        #{usage_rate},
+        #{dp_rate},
+        #{comment},
+        #{cost_house},
+        #{cost_agency},
+        #{cost_tax},
+        #{is_unique},
+        #{evaluation_price},
+        #{evaluation_rate},
+        #{dpe_rate}
+        )
+    </insert>
+
+</mapper>

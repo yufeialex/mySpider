@@ -1,0 +1,54 @@
+package cn.ac.iscas.spider.manager;
+
+import org.apache.log4j.Logger;
+
+import cn.ac.iscas.spider.queue.ListUrlQueue;
+import cn.ac.iscas.spider.threads.DeamonThread;
+import cn.ac.iscas.spider.threads.DetailWorker;
+import cn.ac.iscas.spider.threads.ListWorker;
+import cn.ac.iscas.spider.utils.PropertyConfig;
+
+/**
+ * @author dragonwu
+ * @version 创建时间：2015年6月25日 上午10:09:08
+ * 类说明
+ * 程序总管，即爬虫程序的入口处;
+ * 程序的总体思路为：
+ * 	1、先抓取列表页内的列表项，将抓到的列表页解析出其中的详细页面的链接；
+ *  2、将详细页面的链接放入队列中；
+ *  3、启动多线程程序对详细页面进行抓取；
+ */
+public class SpiderManager implements Runnable{
+	private static final Logger logger = Logger.getLogger(SpiderManager.class.getName());
+	//初始URL
+	private String url;
+	
+	private int detail_thread_num;
+	// 初始化
+	public SpiderManager(){
+		detail_thread_num =Integer.parseInt(PropertyConfig.getPropertyV("spider.threadNum"));
+		url = PropertyConfig.getPropertyV("FirstUrl");
+		ListUrlQueue.addElement(url);
+	}
+	
+	@Override
+	public void run() {
+		//单线程抓取列表页
+		Thread listThread = new Thread(new ListWorker(1));
+		// 声明详细信息抓取的线程组
+		ThreadGroup detail_thread_group = 
+						new ThreadGroup("detail_thread_group"); 
+		// 将所有的线程放入线程数组中
+		Thread[] details = new Thread[detail_thread_num];
+		for (int i = 1; i < detail_thread_num; i++) {
+			// 将所有的线程放入工作组中
+			details[i] = new Thread(detail_thread_group, new DetailWorker(i));
+			details[i].start();
+		}
+		//启动列表线程
+		listThread.run();
+		//启动守护线程统计线程运行情况。
+		Thread daemonThread = new Thread(new DeamonThread(detail_thread_group));
+		daemonThread.run();		
+	}
+}

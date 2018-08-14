@@ -1,0 +1,44 @@
+package cn.ac.iscas.spider.parser;
+
+import java.util.logging.Logger;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import cn.ac.iscas.spider.queue.DetailUrlQueue;
+import cn.ac.iscas.spider.queue.ListUrlQueue;
+import cn.ac.iscas.spider.queue.VisitedUrlQueue;
+
+/**
+ * @author dragonwu
+ * @version 创建时间：2015年6月25日 下午12:34:04
+ * 类说明
+ */
+public class ListParser {
+	
+	private static final Logger logger = Logger.getLogger(ListParser.class
+			.getName());
+
+	public void parse(String pageContent) {
+		if(pageContent != null){
+			Document doc = Jsoup.parse(pageContent);
+			Elements links = doc.select("a[href]"); //带有href属性的a元素
+			for(Element link : links){
+				String linkText = link.attr("href");//取出href内容
+				if (linkText != null){
+					linkText = "http://www.ccgp-guizhou.gov.cn" + linkText;//这里href的网站是相对的，需要拼网址，具体情况具体分析
+					if(linkText.contains("?")){//这里是翻页的url，放到第一队列，需要再次爬取出详细页的url
+						if(!VisitedUrlQueue.isContains(linkText)&&!ListUrlQueue.isContains(linkText)){
+							ListUrlQueue.addElement(linkText);
+						}
+					}else{
+							DetailUrlQueue.addElement(linkText);//这里是详细页的url，放到详细列表中
+					}
+				}
+						
+			}
+		}
+	}
+}
